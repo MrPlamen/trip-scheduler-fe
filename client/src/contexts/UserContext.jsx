@@ -1,4 +1,5 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
+import { useAuth } from "../api/authApi";
 
 export const UserContext = createContext({
     user: null,
@@ -8,55 +9,29 @@ export const UserContext = createContext({
 
 export function UserProvider({ children }) {
     const [user, setUser] = useState(null);
+    const { me } = useAuth();
 
-    // 🔹 Restore user on app start
+    // Restore login from backend session on refresh
     useEffect(() => {
-        // 1️⃣ Try to restore from localStorage
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-            return;
-        }
-
-        // 2️⃣ Try backend session restore
-        fetch("http://localhost:8080/users/me", {
-            credentials: "include" // important — sends session cookie
-        })
-            .then(res => (res.ok ? res.json() : null))
+        me()
             .then(data => {
-                if (data) {
-                    setUser(data);
-                    localStorage.setItem("user", JSON.stringify(data));
-                }
+                setUser(data);     // user is logged in
             })
-            .catch(err => console.error("Session restore failed:", err));
+            .catch(() => {
+                setUser(null);     // not logged in
+            });
     }, []);
 
-    // 🔹 Login handler
-    const userLoginHandler = (authData) => {
-        setUser(authData);
-        localStorage.setItem("user", JSON.stringify(authData));
+    const userLoginHandler = (userData) => {
+        setUser(userData);
     };
 
-    // 🔹 Logout handler
     const userLogoutHandler = () => {
         setUser(null);
-        localStorage.removeItem("user");
-
-        fetch("http://localhost:8080/users/logout", {
-            method: "POST",
-            credentials: "include",
-        }).catch(() => {});
-    };
-
-    const contextValue = {
-        user,
-        userLoginHandler,
-        userLogoutHandler,
     };
 
     return (
-        <UserContext.Provider value={contextValue}>
+        <UserContext.Provider value={{ user, userLoginHandler, userLogoutHandler }}>
             {children}
         </UserContext.Provider>
     );

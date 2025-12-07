@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from 'react-router';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import CommentsShow from '../comment-show/CommentsShow';
 import CommentsCreate from '../comments-create/CommentsCreate';
 import VisitItemsFetcher from '../visit-items/VisitItemsFetcher';
@@ -7,31 +7,83 @@ import { useDeleteTrip, useTrip } from '../../api/tripApi';
 import { useEditItem } from "../../api/visitItemApi";
 import useAuth from '../../hooks/useAuth';
 import { shortFormatDate } from "../../utils/dateUtil";
+import tripLikesService from "../../services/likesService";
 import "../../../public/styles/details.css";
 
 export default function TripDetails() {
     const navigate = useNavigate();
     const { tripId } = useParams();
     const { trip } = useTrip(tripId);
-    const { email, _id: userId } = useAuth();
+    const { email, id: userId } = useAuth();
     const { deleteTrip } = useDeleteTrip();
-    const { edit } = useEditItem(tripId); // pass tripId here
+    const { edit } = useEditItem(tripId);
 
+    // States
     const [comments, setComments] = useState([]);
     const [newVisitItem, setNewVisitItem] = useState({ title: '', description: '', imageUrl: '' });
     const [selectedVisitItem, setSelectedVisitItem] = useState(null);
     const [visitItemsReloadKey, setVisitItemsReloadKey] = useState(0);
+    const [likes, setLikes] = useState([]);
+    const [isLiked, setIsLiked] = useState(false);
 
+    const isOwner = userId === trip?._ownerId;
+    const isMember = Array.isArray(trip?.members) && trip.members.includes(email);
+
+    // Fetch trip likes
+    useEffect(() => {
+        if (!tripId || !email) return;
+
+        const fetchLikes = async () => {
+            try {
+                const fetchedLikes = await tripLikesService.getAll(tripId);
+                setLikes(fetchedLikes);
+                setIsLiked(fetchedLikes.some(like => like.email === email));
+            } catch (err) {
+                console.error("Failed to load likes:", err);
+            }
+        };
+
+        fetchLikes();
+    }, [tripId, email]);
+
+    // Like / Unlike handlers
+    const likeHandler = async () => {
+        console.log("email:", email, "userId:", userId);
+
+        if (!userId) return;
+
+        try {
+            await tripLikesService.createTripLike(email, tripId, userId);
+            setLikes(prev => [...prev, { email, tripId, userId }]);
+            setIsLiked(true);
+        } catch (err) {
+            console.error("Error liking trip:", err);
+        }
+    };
+
+    const unlikeHandler = async () => {
+        try {
+            await tripLikesService.delete(email, tripId);
+            setLikes(prev => prev.filter(like => like.email !== email));
+            setIsLiked(false);
+        } catch (err) {
+            console.error("Error unliking trip:", err);
+        }
+    };
+
+    // Delete trip
     const tripDeleteClickHandler = useCallback(async () => {
         if (!confirm(`Are you sure you want to delete ${trip.title}?`)) return;
         await deleteTrip(tripId);
         navigate('/trips');
     }, [tripId, deleteTrip, navigate, trip?.title]);
 
+    // Comment handler
     const commentCreateHandler = useCallback((newComment) => {
         setComments(prev => [...prev, newComment]);
     }, []);
 
+    // Visit Item handlers
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setNewVisitItem(prev => ({ ...prev, [name]: value }));
@@ -62,7 +114,6 @@ export default function TripDetails() {
             if (selectedVisitItem) {
                 await edit(selectedVisitItem._id, visitItemData);
             } else {
-                // Use proper template string
                 await fetch(`http://localhost:8080/visitItems?tripId=${tripId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -78,8 +129,7 @@ export default function TripDetails() {
         }
     };
 
-    const isOwner = userId === trip?._ownerId;
-    const isMember = Array.isArray(trip?.members) && trip.members.includes(email);
+    if (!trip) return <div>Trip not found!</div>;
 
     return (
         <>
@@ -98,6 +148,18 @@ export default function TripDetails() {
                     </div>
 
                     <p className="text">{trip.summary}</p>
+
+                    {/* Likes Section */}
+                    <div className="likes-section">
+                        <p>{likes.length} likes</p>
+                        {isMember && (
+                            isLiked ? (
+                                <button onClick={unlikeHandler} className="button">Unlike</button>
+                            ) : (
+                                <button onClick={likeHandler} className="button">Like</button>
+                            )
+                        )}
+                    </div>
 
                     <CommentsShow comments={comments} />
 
@@ -125,13 +187,13 @@ export default function TripDetails() {
                             </ul>
                         </div>
                     )}
-                </div>
 
-                <CommentsCreate
-                    email={email}
-                    tripId={tripId}
-                    onCreate={commentCreateHandler}
-                />
+                    <CommentsCreate
+                        email={email}
+                        tripId={tripId}
+                        onCreate={commentCreateHandler}
+                    />
+                </div>
             </section>
 
             {/* Visit Items Section */}
