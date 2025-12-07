@@ -1,0 +1,81 @@
+#catalog-page {
+    margin-top: 100px;
+    background-color: #F6F7FA;
+    background-color: rgb(156, 179, 216);;
+    border-radius: 20px;
+    box-shadow: 0px 0px 4px 0px;
+    overflow: hidden;
+    width: 900px;
+    padding: 20px;
+    height: auto;
+}
+
+#catalog-page>h1 {
+    color: #6b6a6a;
+    font-size: 40px;
+    font-weight: 500;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.allTrips {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    max-width: 100%;
+    margin: 15px;
+    overflow: hidden;
+    width: 600px auto;
+    min-height: 210px;
+    height: auto;
+}
+
+.allTrips-info {
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    position: relative;
+    width: 100%;
+}
+
+.allTrips-info>img {
+    margin-top: -10px;
+    border-radius: 50%;
+    height: 140px;
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    float: right;
+    padding: 5px;
+    width: 140px;
+}
+
+.allTrips-info>h6 {
+    font-size: 20px;
+    font-weight: 750;
+    color: #161618;
+}
+
+.allTrips-info>h2 {
+    font-size: 20px;
+    font-weight: 750;
+    color: #161618;
+}
+
+.details-button {
+    background-color:#468da2;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    font-size: 20px;
+    position: absolute;
+    bottom: 30px;
+    text-align: center;
+    letter-spacing: 1px;
+    padding: 10px;
+    margin-top: auto;
+    margin-left: 20px;
+    align-self: center;
+    width: 240px;
+    border-radius: 50px;
+}

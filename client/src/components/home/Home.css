@@ -1,0 +1,16 @@
+.image-latest {
+    width: 420px;
+}
+
+.trip {
+    margin: 22px;
+}
+
+.trip-text {
+    background-color: whitesmoke;
+}
+
+.trip-footer {
+    height: 22px;
+    background-color: whitesmoke;
+}

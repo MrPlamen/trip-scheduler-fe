@@ -1,0 +1,118 @@
+/* Universal Reset */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: sans-serif; /* TODO: put the default font */
+  background-color: transparent;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+input,
+button,
+textarea {
+  outline: none;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit; 
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.logged-username {
+  color: rgb(35, 142, 188);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.logged-admin {
+  color: rgb(188, 35, 127);
+  text-decoration: underline;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.nav-link {
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 90px rgba(143, 142, 142, 0.7); 
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-container img {
+  margin-top: 6px;
+}
+
+textarea {
+  padding: 8px;
+}
+
+label {
+  color: black;
+}
+
+#trip-details h2 {
+  margin-bottom: 8px;
+}
+
+/* .edit-details-btn {
+  padding-top: 2px;
+} */
+
+.details-btn {
+  color: gray;
+}
+
+.allTrips-info h6 {
+  color: gray;
+}
+
+.allTrips-info p {
+  overflow: hidden;
+  display: block;
+  padding: 24px;
+  color: red;
+}
