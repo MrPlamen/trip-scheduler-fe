@@ -1,27 +1,24 @@
 import request from "../utils/request";
 
-const baseUrl = 'http://localhost:8080/jsonstore/itemLikes';
+const BASE_URL = "http://localhost:8080/visitItemLikes";
 
 export default {
-    async getAll(visitItemId) {
-        const likes = await request.get(baseUrl);
+  async getCount(visitItemId) {
+    const res = await request.get(`${BASE_URL}/count?visitItemId=${visitItemId}`);
+    return res.count ?? 0; 
+  },
 
-        const tripLikes = Object.values(likes).filter(like => like.visitItemId === visitItemId);
+  async isLiked(visitItemId, userId) {
+    const res = await request.get(`${BASE_URL}/isLiked?visitItemId=${visitItemId}&userId=${userId}`);
+    return res.liked ?? false; 
+  },
 
-        return tripLikes;
-    },
-    createItemLike(email, visitItemId, like, userId) {
-        
-        return request.post(baseUrl, { email, visitItemId, like, userId });
-    },
+  async toggle(visitItemId, userId) {
+    const res = await request.post(`${BASE_URL}/toggle?visitItemId=${visitItemId}&userId=${userId}`);
+    return res.liked ?? false;
+  },
 
-    async delete(email, visitItemId) {
-        const likes = await request.get(baseUrl);
-        const itemLikes = Object.values(likes).filter(like => like.visitItemId === visitItemId && like.email === email);
-
-        if (itemLikes.length > 0) {
-            const likeId = itemLikes[0]._id; 
-            await request.delete(`${baseUrl}/${likeId}`); 
-        }
-    }
+  async getAll(visitItemId) {
+    return request.get(`${BASE_URL}/all?visitItemId=${visitItemId}`);
+  }
 };

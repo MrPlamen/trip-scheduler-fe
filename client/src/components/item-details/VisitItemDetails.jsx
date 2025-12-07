@@ -14,7 +14,7 @@ export default function VisitItemDetails() {
     const [likes, setLikes] = useState([]);
     const [comments, setComments] = useState([]);
     const [isLiked, setIsLiked] = useState(false);
-    const { email, _id: userId } = useAuth();
+    const { email, id: userId } = useAuth();
     const { deleteItem } = useDeleteItem();
     const { edit } = useEditItem();
     const navigate = useNavigate();
@@ -59,6 +59,7 @@ export default function VisitItemDetails() {
     }, []);
 
     const likeHandler = async () => {
+        console.log("email:", email, "userId:", userId);
         try {
             const newLike = { email, visitItemId, like: true, userId };
             await itemLikesService.createItemLike(email, visitItemId, true, userId);

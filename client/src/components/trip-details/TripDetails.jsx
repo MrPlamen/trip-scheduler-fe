@@ -48,8 +48,6 @@ export default function TripDetails() {
 
     // Like / Unlike handlers
     const likeHandler = async () => {
-        console.log("email:", email, "userId:", userId);
-
         if (!userId) return;
 
         try {
