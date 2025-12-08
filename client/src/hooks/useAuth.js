@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from "react";
+import { useCallback, useMemo, useContext } from "react";
 import { UserContext } from "../contexts/UserContext";
 import request from "../utils/request";
 
@@ -7,25 +7,25 @@ export default function useAuth() {
 
   const requestWrapper = useCallback(
     (method, url, data, options = {}) => {
-      const authOptions = {
-        ...options,
-        headers: {
-          'X-Authorization': accessToken,
-          ...options.headers
-        }
-      };
+      const headers = { ...options.headers };
+      if (accessToken) headers["X-Authorization"] = accessToken;
 
-      return request[method.toLowerCase()](url, data, accessToken ? authOptions : options);
+      const finalOptions = { ...options, headers };
+
+      return request[method.toLowerCase()](url, data, finalOptions);
     },
     [accessToken]
   );
 
-  const requestObject = useMemo(() => ({
-    get: requestWrapper.bind(null, 'GET'),
-    post: requestWrapper.bind(null, 'POST'),
-    put: requestWrapper.bind(null, 'PUT'),
-    delete: requestWrapper.bind(null, 'DELETE'),
-  }), [requestWrapper]);
+  const requestObject = useMemo(
+    () => ({
+      get: requestWrapper.bind(null, "GET"),
+      post: requestWrapper.bind(null, "POST"),
+      put: requestWrapper.bind(null, "PUT"),
+      delete: requestWrapper.bind(null, "DELETE"),
+    }),
+    [requestWrapper]
+  );
 
   return {
     ...authData,

@@ -1,227 +1,152 @@
-import { Link, useNavigate, useParams } from 'react-router';
-import { useDeleteItem, useVisitItem, useEditItem } from "../../api/visitItemApi";
-import { useTrip } from "../../api/tripApi";
-import itemLikesService from "../../services/itemLikesService";
-import { useCallback, useEffect, useState } from "react";
-import useAuth from '../../hooks/useAuth';
-import commentService from '../../services/commentService';
-import CommentsShow from '../comment-show/CommentsShow';
-import CommentsCreate from '../comments-create/CommentsCreate';
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import {
+  useVisitItem,
+  useEditItem,
+  useDeleteItem,
+  useItemInteractions
+} from "../../api/visitItemApi";
+import useAuth from "../../hooks/useAuth";
+import CommentsShow from "../comment-show/CommentsShow";
+import CommentsCreate from "../comments-create/CommentsCreate";
 
 export default function VisitItemDetails() {
-    const { visitItemId } = useParams();
-    const { visitItem, refetchVisitItem } = useVisitItem(visitItemId);
-    const [likes, setLikes] = useState([]);
-    const [comments, setComments] = useState([]);
-    const [isLiked, setIsLiked] = useState(false);
-    const { email, id: userId } = useAuth();
-    const { deleteItem } = useDeleteItem();
-    const { edit } = useEditItem();
-    const navigate = useNavigate();
-    const [newVisitItem, setNewVisitItem] = useState({
-        title: visitItem.title,
-        description: visitItem.description,
-        imageUrl: visitItem.imageUrl
+  const { visitItemId } = useParams();
+  const navigate = useNavigate();
+  const { email, id: userId } = useAuth();
+
+  // ------------------- Load visit item -------------------
+  const { visitItem, refetchVisitItem } = useVisitItem(visitItemId);
+
+  // ------------------- Likes & comments -------------------
+  const { likes, comments, isLiked, toggleLike, addComment } =
+    useItemInteractions(visitItemId, userId);
+
+  // ------------------- Local state -------------------
+  const [editItem, setEditItem] = useState(false);
+  const [newVisitItem, setNewVisitItem] = useState({
+    title: "",
+    description: "",
+    imageUrl: "",
+    category: "",
+  });
+
+  const { edit } = useEditItem();
+  const { deleteItem } = useDeleteItem();
+
+  // ------------------- Early return -------------------
+  if (!visitItem) return <div>Loading visit item...</div>;
+
+  const createdDate = new Date(visitItem._createdOn).toLocaleDateString();
+  const isOwner = visitItem._ownerId === userId;
+  const isMember = visitItem.members?.includes(email);
+
+  // ------------------- Handlers -------------------
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewVisitItem((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const editVisitItemHandler = () => {
+    setEditItem(true);
+    setNewVisitItem({
+      title: visitItem.title,
+      description: visitItem.description,
+      imageUrl: visitItem.imageUrl,
+      category: visitItem.category || "",
     });
-    const [editItem, setEditItem] = useState(null);
+  };
 
-    // If visitItem is not yet fetched
-    if (!visitItem) {
-        return <div>Visit item not found!</div>;
+  const visitItemSubmitHandler = async (e) => {
+    e.preventDefault();
+    try {
+      await edit(visitItemId, { ...visitItem, ...newVisitItem });
+      setEditItem(false);
+      refetchVisitItem();
+    } catch (err) {
+      console.error("Error saving item:", err);
     }
+  };
 
-    const timestamp = visitItem._createdOn;
-    const date = new Date(timestamp);
-    const trip = visitItem.tripId;
+  const itemDeleteClickHandler = async () => {
+    if (!window.confirm(`Delete ${visitItem.title}?`)) return;
+    await deleteItem(visitItemId);
+    navigate("/visits");
+  };
 
-    const { trip: tripDetails } = useTrip(trip);
-    const tripTitle = tripDetails.title;
+  // ------------------- Render -------------------
+  return (
+    <section id="trip-details">
+      <h2>Visit Point Details</h2>
 
-    // Fetch comments and likes based on tripId
-    useEffect(() => {
-        const fetchComments = async () => {
-            const fetchedComments = await commentService.getAll(visitItemId);
-            setComments(fetchedComments);
-        };
+      <div className="info-section">
+        <div className="trip-header">
+          <img className="trip-img" src={visitItem.imageUrl} alt={visitItem.title} />
 
-        const fetchLikes = async () => {
-            const fetchedLikes = await itemLikesService.getAll(visitItemId);
-            setLikes(fetchedLikes);
-            setIsLiked(fetchedLikes.some(like => like.email === email));
-        };
+          {editItem ? (
+            <input name="title" value={newVisitItem.title} onChange={handleInputChange} />
+          ) : (
+            <h1>{visitItem.title}</h1>
+          )}
 
-        fetchComments();
-        fetchLikes();
-    }, [visitItemId, email]);
+          <span className="levels">Created on: {createdDate}</span>
 
-    const commentCreateHandler = useCallback((newComment) => {
-        setComments((prevState) => [...prevState, newComment]);
-    }, []);
+          {editItem ? (
+            <input name="category" value={newVisitItem.category} onChange={handleInputChange} />
+          ) : (
+            <p className="type">{visitItem.category}</p>
+          )}
 
-    const likeHandler = async () => {
-        console.log("email:", email, "userId:", userId);
-        try {
-            const newLike = { email, visitItemId, like: true, userId };
-            await itemLikesService.createItemLike(email, visitItemId, true, userId);
-            setLikes((prevLikes) => [...prevLikes, newLike]);
-            setIsLiked(true);
-        } catch (error) {
-            console.error('Error liking the trip:', error);
-        }
-    };
+          {editItem ? (
+            <textarea
+              name="description"
+              value={newVisitItem.description}
+              onChange={handleInputChange}
+            />
+          ) : (
+            <p className="text">{visitItem.description}</p>
+          )}
+        </div>
 
-    const unlikeHandler = async () => {
-        try {
-            await itemLikesService.delete(email, visitItemId);
-            setLikes((prevLikes) => prevLikes.filter(like => like.email !== email));
-            setIsLiked(false);
-        } catch (error) {
-            console.error('Error unliking the trip:', error);
-        }
-    };
+        {/* Likes */}
+        {isOwner && !editItem && (
+          <div className="likes-section">
+            <p>{likes.length} likes</p>
+            <button onClick={toggleLike} className="button">
+              {isLiked ? "Unlike" : "Like"}
+            </button>
+          </div>
+        )}
 
-    const itemDeleteClickHandler = useCallback(async () => {
-        const hasConfirm = confirm(`Are you sure you want to delete ${visitItem.title}?`);
-        if (!hasConfirm) return;
+        {/* Comments */}
+        {isMember && !editItem && <CommentsShow comments={comments} />}
 
-        await deleteItem(visitItemId);
-        navigate('/visits');
-    }, [visitItemId, deleteItem, navigate, visitItem.title]);
+        {/* Owner buttons */}
+        {isOwner && !editItem && (
+          <div className="buttons">
+            <button onClick={editVisitItemHandler} className="button edit-details-btn">
+              Edit
+            </button>
+            <button onClick={itemDeleteClickHandler} className="button">
+              Delete
+            </button>
+          </div>
+        )}
 
-    const visitItemSubmitHandler = async (event) => {
-        event.preventDefault();
+        {/* Comment create */}
+        {isMember && !editItem && (
+          <CommentsCreate email={email} tripId={visitItemId} onCreate={addComment} />
+        )}
+      </div>
 
-        const members = visitItem.members;  // Preserve the current members
-
-        const visitItemData = {
-            ...visitItem,  // Spread the original visitItem data to preserve all properties
-            ...newVisitItem,  // Spread the updated properties (title, description, imageUrl)
-            members,
-            _ownerId: userId,
-            _createdOn: visitItem._createdOn,  // Keep the original creation timestamp
-        };
-
-        try {
-            if (editItem) {
-                // Edit existing visit item
-                await edit(editItem._id, visitItemData);
-                // Manually trigger refetch
-                refetchVisitItem(); // This will re-fetch the updated visit item
-            }
-
-            setEditItem(null); // Clear the selected item after submission
-        } catch (error) {
-            console.error('Error saving visit item:', error);
-        }
-    };
-
-    const handleInputChange = (event) => {
-        const { name, value } = event.target;
-        setNewVisitItem((prevState) => ({
-            ...prevState,
-            [name]: value
-        }));
-    };
-
-    const editVisitItemHandler = (visitItem) => {
-        setEditItem(visitItem);
-        setNewVisitItem({
-            title: visitItem.title,
-            description: visitItem.description,
-            imageUrl: visitItem.imageUrl
-        });
-    };
-
-    const isOwner = userId === visitItem?._ownerId;
-    const isMember = Array.isArray(visitItem.members) && visitItem.members.includes(email);
-
-    return (
-        <section id="trip-details">
-            <h1>{tripTitle} trip:</h1>
-            <h2>Visit Point Details</h2>
-            <div className="info-section">
-                <div className="trip-header">
-                    <img className="trip-img" src={visitItem.imageUrl} alt={visitItem.title} />
-
-                    {/* Editable Title */}
-                    {editItem ? (
-                        <input
-                            type="text"
-                            name="title"
-                            value={newVisitItem.title}
-                            onChange={handleInputChange}
-                            placeholder="Title"
-                            required
-                        />
-                    ) : (
-                        <h1>{visitItem.title}</h1>
-                    )}
-
-                    <span className="levels">Created on: {date.toLocaleDateString()}</span>
-
-                    {/* Editable Category */}
-                    {editItem ? (
-                        <input
-                            type="text"
-                            name="category"
-                            placeholder="Category"
-                            value={newVisitItem.category}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    ) : (
-                        <p className="type">{visitItem.category}</p>
-                    )}
-
-                    {/* Editable Description */}
-                    {editItem ? (
-                        <textarea
-                            name="description"
-                            placeholder="Description"
-                            value={newVisitItem.description}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    ) : (
-                        <p className="text">{visitItem.description}</p>
-                    )}
-                </div>
-
-                {isOwner && !editItem && (
-                <div className="likes-section">
-                    <p>{likes.length} likes</p>
-                    {isLiked ? (
-                        <button onClick={unlikeHandler} className="button">Unlike</button>
-                    ) : (
-                        <button onClick={likeHandler} className="button">Like</button>
-                    )}
-                </div>
-                )}
-
-                {isMember && !editItem && (
-                    <CommentsShow comments={comments} />
-                )}
-
-                {isOwner && !editItem && (
-                    <div className="buttons">
-                        <button onClick={() => editVisitItemHandler(visitItem)} className="button edit-details-btn">Edit</button>
-                        <button onClick={itemDeleteClickHandler} className="button">Delete</button>
-                    </div>
-                )}
-
-                {isMember && !editItem && (
-                    <CommentsCreate
-                        email={email}
-                        tripId={visitItemId}
-                        onCreate={commentCreateHandler}
-                />)}
-            </div>
-
-            {(isOwner && editItem) && (
-                <div className="buttons">
-                    <button onClick={visitItemSubmitHandler} className="button">Save Changes</button>
-                </div>
-            )}
-        </section>
-    );
+      {/* Save button */}
+      {isOwner && editItem && (
+        <div className="buttons">
+          <button onClick={visitItemSubmitHandler} className="button">
+            Save Changes
+          </button>
+        </div>
+      )}
+    </section>
+  );
 }
