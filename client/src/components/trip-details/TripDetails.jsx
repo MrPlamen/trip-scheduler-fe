@@ -26,7 +26,7 @@ export default function TripDetails() {
     const [likes, setLikes] = useState([]);
     const [isLiked, setIsLiked] = useState(false);
 
-    const isOwner = userId === trip?._ownerId;
+    const isOwner = email === trip?.ownerEmail;
     const isMember = Array.isArray(trip?.members) && trip.members.includes(email);
 
     // Fetch trip likes
