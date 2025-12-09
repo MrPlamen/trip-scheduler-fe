@@ -6,15 +6,21 @@ export default function VisitItemsFetcher({ tripId, email, userId, onLike, onEdi
     const [visitItems, setVisitItems] = useState([]);
 
     const fetchVisitItems = useCallback(async () => {
-        if (!tripId) return; // avoid fetching if tripId is missing
+        if (!tripId) return; 
 
         try {
             const response = await request.get(`http://localhost:8080/trips/${tripId}/visit-items`);
             
             if (response) {
-                // Ensure response is an array
                 const itemsArray = Array.isArray(response) ? response : Object.values(response);
-                setVisitItems(itemsArray);
+
+                // Ensure members is an array of MemberResponse objects
+                const normalizedItems = itemsArray.map(item => ({
+                    ...item,
+                    members: Array.isArray(item.members) ? item.members : [],
+                }));
+
+                setVisitItems(normalizedItems);
             } else {
                 setVisitItems([]);
             }
@@ -25,7 +31,7 @@ export default function VisitItemsFetcher({ tripId, email, userId, onLike, onEdi
 
     useEffect(() => {
         fetchVisitItems();
-    }, [fetchVisitItems, reloadTrigger]); 
+    }, [fetchVisitItems, reloadTrigger]);
 
     return (
         <VisitItems

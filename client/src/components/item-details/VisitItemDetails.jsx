@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   useVisitItem,
@@ -19,7 +19,7 @@ export default function VisitItemDetails() {
   const { visitItem, refetchVisitItem } = useVisitItem(visitItemId);
 
   // ------------------- Likes & comments -------------------
-  const { likes, comments, isLiked, toggleLike, addComment } =
+  const { likes, comments, isLiked, toggleLike } =
     useItemInteractions(visitItemId, userId);
 
   // ------------------- Local state -------------------
@@ -31,15 +31,25 @@ export default function VisitItemDetails() {
     category: "",
   });
 
+  // Local comments state for live updates
+  const [localComments, setLocalComments] = useState([]);
+
   const { edit } = useEditItem();
   const { deleteItem } = useDeleteItem();
+
+  // Initialize localComments when comments from hook load
+  useEffect(() => {
+    if (comments) {
+      setLocalComments(comments);
+    }
+  }, [comments]);
 
   // ------------------- Early return -------------------
   if (!visitItem) return <div>Loading visit item...</div>;
 
   const createdDate = new Date(visitItem._createdOn).toLocaleDateString();
-  const isOwner = visitItem._ownerId === userId;
-  const isMember = visitItem.members?.includes(email);
+  const isOwner = visitItem.ownerId === userId;
+  const isMember = visitItem.members?.some(m => m.email === email);
 
   // ------------------- Handlers -------------------
   const handleInputChange = (e) => {
@@ -72,6 +82,11 @@ export default function VisitItemDetails() {
     if (!window.confirm(`Delete ${visitItem.title}?`)) return;
     await deleteItem(visitItemId);
     navigate("/visits");
+  };
+
+  // Handler to immediately add new comment
+  const handleNewComment = (newComment) => {
+    setLocalComments(prev => [newComment, ...prev]);
   };
 
   // ------------------- Render -------------------
@@ -119,7 +134,7 @@ export default function VisitItemDetails() {
         )}
 
         {/* Comments */}
-        {isMember && !editItem && <CommentsShow comments={comments} />}
+        {isMember && !editItem && <CommentsShow comments={localComments} />}
 
         {/* Owner buttons */}
         {isOwner && !editItem && (
@@ -133,9 +148,9 @@ export default function VisitItemDetails() {
           </div>
         )}
 
-        {/* Comment create */}
+        {/* Create comment */}
         {isMember && !editItem && (
-          <CommentsCreate email={email} tripId={visitItemId} onCreate={addComment} />
+          <CommentsCreate tripId={visitItemId} onCreate={handleNewComment} />
         )}
       </div>
 

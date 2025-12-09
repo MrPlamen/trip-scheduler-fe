@@ -26,10 +26,11 @@ export default function Home() {
                                     <h3>{trip.title}</h3>
                                     <br />
                                     <div className="data-buttons">
-                                        {email && Array.isArray(trip.members) && trip.members.includes(email) && (
+                                        {email && Array.isArray(trip.members) && trip.members.some(member => member.email === email) && (
                                             <Link to={`/trips/${trip._id}/details`} className="btn details-btn">Details</Link>
                                         )}
                                     </div>
+
                                 </div>
                                 <div className="image-latest">
                                     <img src={trip.imageUrl} alt={trip.title} />

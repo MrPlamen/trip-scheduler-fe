@@ -27,12 +27,11 @@ export default function TripDetails() {
     const [isLiked, setIsLiked] = useState(false);
 
     const isOwner = email === trip?.ownerEmail;
-    const isMember = Array.isArray(trip?.members) && trip.members.includes(email);
+    const isMember = Array.isArray(trip?.members) && trip.members.some(m => m.email === email);
 
     // Fetch trip likes
     useEffect(() => {
         if (!tripId || !email) return;
-
         const fetchLikes = async () => {
             try {
                 const fetchedLikes = await tripLikesService.getAll(tripId);
@@ -42,14 +41,11 @@ export default function TripDetails() {
                 console.error("Failed to load likes:", err);
             }
         };
-
         fetchLikes();
     }, [tripId, email]);
 
-    // Like / Unlike handlers
     const likeHandler = async () => {
         if (!userId) return;
-
         try {
             await tripLikesService.createTripLike(email, tripId, userId);
             setLikes(prev => [...prev, { email, tripId, userId }]);
@@ -69,16 +65,15 @@ export default function TripDetails() {
         }
     };
 
-    // Delete trip
     const tripDeleteClickHandler = useCallback(async () => {
         if (!confirm(`Are you sure you want to delete ${trip.title}?`)) return;
         await deleteTrip(tripId);
         navigate('/trips');
     }, [tripId, deleteTrip, navigate, trip?.title]);
 
-    // Comment handler
+    // This handler updates comments immediately
     const commentCreateHandler = useCallback((newComment) => {
-        setComments(prev => [...prev, newComment]);
+        setComments(prev => [newComment, ...prev]); // prepend new comment
     }, []);
 
     // Visit Item handlers
@@ -127,9 +122,9 @@ export default function TripDetails() {
         }
     };
 
+    // Load comments on page load
     useEffect(() => {
         if (!tripId) return;
-
         const fetchComments = async () => {
             try {
                 const data = await fetch(`http://localhost:8080/comments/trip/${tripId}`);
@@ -139,7 +134,6 @@ export default function TripDetails() {
                 console.error("Failed to load comments:", err);
             }
         };
-
         fetchComments();
     }, [tripId]);
 
@@ -191,22 +185,27 @@ export default function TripDetails() {
                         </div>
                     )}
 
+                    {/* Members */}
                     {Array.isArray(trip.members) && trip.members.length > 0 && (
                         <div className="members-box">
                             <h3>Trip Members ({trip.members.length})</h3>
                             <ul>
-                                {trip.members.map((memberEmail, index) => (
-                                    <li key={index}>{memberEmail}</li>
+                                {trip.members.map(member => (
+                                    <li key={member.id}>
+                                        {member.username ? member.username : member.email}
+                                    </li>
                                 ))}
                             </ul>
                         </div>
                     )}
 
-                    <CommentsCreate
-                        email={email}
-                        tripId={tripId}
-                        onCreate={commentCreateHandler}
-                    />
+                    {/* Create comment */}
+                    {isMember && (
+                        <CommentsCreate
+                            tripId={tripId}
+                            onCreate={commentCreateHandler}
+                        />
+                    )}
                 </div>
             </section>
 

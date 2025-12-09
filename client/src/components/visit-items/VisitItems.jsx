@@ -17,7 +17,6 @@ export default function VisitItems({ visitItems, email, userId, onEdit }) {
 
       for (const item of visitItems) {
         if (!item.id && !item._id) continue; // safety check
-
         const id = item.id ?? item._id;
 
         try {
@@ -72,6 +71,21 @@ export default function VisitItems({ visitItems, email, userId, onEdit }) {
                 <h3>{item.title}</h3>
                 <p><Link to={`/visits/${id}/details`} className="visit-item-card-link">Details</Link></p>
                 <p>{item.description}</p>
+
+                {/* Members list */}
+                {Array.isArray(item.members) && item.members.length > 0 && (
+                  <div className="visit-item-members">
+                    <h4>Members:</h4>
+                    <ul>
+                      {item.members.map(member => (
+                        <li key={member.id}>
+                          {member.username ? member.username : member.email}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 <span>Likes: {likes[id] ?? 0}</span>
                 <div className="likes-section">
                   <button

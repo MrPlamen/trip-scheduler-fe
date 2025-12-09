@@ -1,20 +1,13 @@
 export default function CommentsShow({ comments }) {
+    if (!comments || comments.length === 0) return <p>No comments yet.</p>;
 
     return (
-        <div className="details-comments">
-            <h2>Comments:</h2>
-            <ul>
-                {comments.length > 0
-                    ? comments.map(comment => (
-                        <li key={comment._id} className="comment">
-                            <p>
-                                {comment.username ? comment.username : comment.email}: {comment.comment}
-                            </p>
-                        </li>
-                    ))
-                    : <p className="no-comment">No comments.</p>
-                }
-            </ul>
-        </div>
+        <ul className="comments-list">
+            {comments.map(comment => (
+                <li key={comment.id} className="comment-item">
+                    <strong>{comment.username ? comment.username : comment.email}</strong>: {comment.comment}
+                </li>
+            ))}
+        </ul>
     );
 }

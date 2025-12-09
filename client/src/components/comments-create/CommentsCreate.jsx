@@ -13,11 +13,18 @@ export default function CommentsCreate({ tripId, onCreate }) {
 
         if (!commentText) return;
 
-        const createdComment = await commentService.create(username, email, tripId, commentText);
+        try {
+            const createdComment = await commentService.create(username, email, tripId, commentText);
 
-        onCreate(createdComment);
+            // Safely call onCreate if provided
+            if (typeof onCreate === "function") {
+                onCreate(createdComment);
+            }
 
-        e.target.reset(); 
+            e.target.reset(); 
+        } catch (err) {
+            console.error("Error creating comment:", err);
+        }
     };
 
     return (
