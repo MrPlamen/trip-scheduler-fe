@@ -127,6 +127,22 @@ export default function TripDetails() {
         }
     };
 
+    useEffect(() => {
+        if (!tripId) return;
+
+        const fetchComments = async () => {
+            try {
+                const data = await fetch(`http://localhost:8080/comments/trip/${tripId}`);
+                const json = await data.json();
+                setComments(Array.isArray(json) ? json : []);
+            } catch (err) {
+                console.error("Failed to load comments:", err);
+            }
+        };
+
+        fetchComments();
+    }, [tripId]);
+
     if (!trip) return <div>Trip not found!</div>;
 
     return (

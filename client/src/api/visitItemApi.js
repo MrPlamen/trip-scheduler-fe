@@ -1,4 +1,3 @@
-// visitItemApi.js
 import { useEffect, useState, useCallback } from "react";
 import useAuth from "../hooks/useAuth";
 import commentService from "../services/commentService";
@@ -84,30 +83,31 @@ export const useDeleteItem = () => {
     return { deleteItem };
 };
 
-// ------------------ Likes and comments ------------------
-export const useItemInteractions = (visitItemId, userId) => {
+// ------------------ Likes and comments (works for trips or visit items) ------------------
+export const useItemInteractions = (parentId, userId) => {
     const [likes, setLikes] = useState([]);
     const [comments, setComments] = useState([]);
     const [isLiked, setIsLiked] = useState(false);
 
     const fetchInteractions = useCallback(async () => {
-        if (!visitItemId) return;
+        if (!parentId) return;
 
         try {
-            // Likes
-            let fetchedLikes = await itemLikesService.getAll(visitItemId);
+            // Likes (only meaningful for visit items)
+            let fetchedLikes = await itemLikesService.getAll(parentId);
             fetchedLikes = Array.isArray(fetchedLikes) ? fetchedLikes : [];
             setLikes(fetchedLikes);
             setIsLiked(fetchedLikes.some(like => like.userId === userId));
 
-            // Comments
-            let fetchedComments = await commentService.getAll(visitItemId);
+            // Comments (works for both trips and visit items)
+            let fetchedComments = await commentService.getAll(parentId);
             fetchedComments = Array.isArray(fetchedComments) ? fetchedComments : [];
             setComments(fetchedComments);
+
         } catch (err) {
             console.error("Error fetching likes/comments:", err);
         }
-    }, [visitItemId, userId]);
+    }, [parentId, userId]);
 
     useEffect(() => {
         fetchInteractions();
