@@ -56,7 +56,14 @@ export const useEditItem = () => {
     const edit = useCallback(async (visitItemId, visitItemData) => {
         if (!visitItemId) return;
         try {
-            return await request.put(`http://localhost:8080/visit-items/${visitItemId}`, visitItemData);
+            return await request.put(
+                `http://localhost:8080/visit-items/${visitItemId}`,
+                visitItemData,
+                {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: 'include'  // if using session/cookie auth
+                }
+            );
         } catch (err) {
             console.error("Error editing visit item:", err);
             throw err;

@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from 'react-router';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, use } from 'react';
 import CommentsShow from '../comment-show/CommentsShow';
 import CommentsCreate from '../comments-create/CommentsCreate';
 import VisitItemsFetcher from '../visit-items/VisitItemsFetcher';
@@ -123,12 +123,11 @@ export default function TripDetails() {
 
     const visitItemSubmitHandler = async (event) => {
         event.preventDefault();
-        const members = trip.members;
+
+        console.log(userId);
 
         const visitItemData = {
             ...newVisitItem,
-            tripId,
-            members,
             _ownerId: userId,
             _createdOn: Date.now()
         };
@@ -137,9 +136,10 @@ export default function TripDetails() {
             if (selectedVisitItem) {
                 await edit(selectedVisitItem._id, visitItemData);
             } else {
-                await fetch(`http://localhost:8080/visitItems?tripId=${tripId}`, {
+                await fetch(`http://localhost:8080/trips/${tripId}/visit-items`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify(visitItemData)
                 });
             }
@@ -151,6 +151,7 @@ export default function TripDetails() {
             console.error('Error saving visit item:', error);
         }
     };
+
 
     // Load comments
     useEffect(() => {
