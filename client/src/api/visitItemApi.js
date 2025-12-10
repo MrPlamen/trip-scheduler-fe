@@ -9,11 +9,17 @@ export const useVisitItems = (tripId) => {
     const [visitItems, setVisitItems] = useState([]);
 
     useEffect(() => {
-        if (!tripId) return;
-
         const fetchItems = async () => {
             try {
-                const data = await request.get(`http://localhost:8080/trips/${tripId}/visit-items`);
+                let url;
+
+                if (tripId) {
+                    url = `http://localhost:8080/trips/${tripId}/visit-items`;
+                } else {
+                    url = `http://localhost:8080/visit-items`;
+                }
+
+                const data = await request.get(url);
                 setVisitItems(Array.isArray(data) ? data : []);
             } catch (err) {
                 console.error("Error fetching visit items:", err);

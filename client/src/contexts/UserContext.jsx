@@ -11,7 +11,6 @@ export function UserProvider({ children }) {
     const [user, setUser] = useState(null);
     const { me } = useAuth();
 
-    // Restore login from backend session on refresh
     useEffect(() => {
         me()
             .then(data => {
