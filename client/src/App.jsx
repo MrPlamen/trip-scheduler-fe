@@ -15,6 +15,7 @@ import VisitItemCatalog from './components/item-catalog/VisitItemCatalog'
 import VisitItemDetails from './components/item-details/VisitItemDetails'
 import Search from './components/search/Search'
 import PrivateRoute from './components/PrivateRoute'
+import NotFound from './components/not-found/NotFound';
 import './App.css'
 
 function App() {
@@ -95,6 +96,8 @@ function App() {
                 <Logout />
               </PrivateRoute>
             } />
+
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
       </div>

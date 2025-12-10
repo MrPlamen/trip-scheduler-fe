@@ -9,6 +9,7 @@ import {
 import useAuth from "../../hooks/useAuth";
 import CommentsShow from "../comment-show/CommentsShow";
 import CommentsCreate from "../comments-create/CommentsCreate";
+import VisitItemNotFound from "../not-found/VisitItemNotFound"; // Make sure this component exists
 
 export default function VisitItemDetails() {
   const { visitItemId } = useParams();
@@ -33,6 +34,7 @@ export default function VisitItemDetails() {
 
   // Local comments state for live updates
   const [localComments, setLocalComments] = useState([]);
+  const [notFound, setNotFound] = useState(false);
 
   const { edit } = useEditItem();
   const { deleteItem } = useDeleteItem();
@@ -44,7 +46,17 @@ export default function VisitItemDetails() {
     }
   }, [comments]);
 
-  // ------------------- Early return -------------------
+  // ------------------- Handle visit item not found -------------------
+  useEffect(() => {
+    if (visitItem === null) {
+      setNotFound(true);
+    } else {
+      setNotFound(false);
+    }
+  }, [visitItem]);
+
+  if (notFound) return <VisitItemNotFound />; // Render 404 component if not found
+
   if (!visitItem) return <div>Loading visit item...</div>;
 
   const createdDate = new Date(visitItem._createdOn).toLocaleDateString();
@@ -148,7 +160,7 @@ export default function VisitItemDetails() {
           </div>
         )}
 
-        {/* Create comment */}
+        {/* Comment create */}
         {isMember && !editItem && (
           <CommentsCreate tripId={visitItemId} onCreate={handleNewComment} />
         )}

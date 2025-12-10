@@ -3,20 +3,52 @@ import { useState, useCallback, useEffect } from 'react';
 import CommentsShow from '../comment-show/CommentsShow';
 import CommentsCreate from '../comments-create/CommentsCreate';
 import VisitItemsFetcher from '../visit-items/VisitItemsFetcher';
-import { useDeleteTrip, useTrip } from '../../api/tripApi';
+import { useDeleteTrip } from '../../api/tripApi';
 import { useEditItem } from "../../api/visitItemApi";
 import useAuth from '../../hooks/useAuth';
 import { shortFormatDate } from "../../utils/dateUtil";
 import tripLikesService from "../../services/likesService";
+import NotFound from "../not-found/NotFound";
 import "../../../public/styles/details.css";
+import TripNotFound from '../not-found/TripNotFound';
 
 export default function TripDetails() {
     const navigate = useNavigate();
     const { tripId } = useParams();
-    const { trip } = useTrip(tripId);
     const { email, id: userId } = useAuth();
     const { deleteTrip } = useDeleteTrip();
     const { edit } = useEditItem(tripId);
+
+    // Trip state + 404 handling
+    const [trip, setTrip] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
+
+    // Fetch trip manually with 404 check
+    useEffect(() => {
+        if (!tripId) return;
+
+        setLoading(true);
+        setNotFound(false);
+
+        fetch(`http://localhost:8080/data/trips/${tripId}`)
+            .then(async res => {
+                if (res.status === 404) {
+                    setNotFound(true);
+                    return null;
+                }
+                if (!res.ok) throw new Error("Server error");
+                return res.json();
+            })
+            .then(data => {
+                if (data) setTrip(data);
+            })
+            .catch(() => {
+                // Any 500 or network error should NOT break the page
+                console.error("Trip fetch failed");
+            })
+            .finally(() => setLoading(false));
+    }, [tripId]);
 
     // States
     const [comments, setComments] = useState([]);
@@ -29,10 +61,10 @@ export default function TripDetails() {
     const isOwner = email === trip?.ownerEmail;
     const isMember = Array.isArray(trip?.members) && trip.members.some(m => m.email === email);
 
-    // Fetch trip likes
+    // Fetch likes
     useEffect(() => {
         if (!tripId || !email) return;
-        const fetchLikes = async () => {
+        const load = async () => {
             try {
                 const fetchedLikes = await tripLikesService.getAll(tripId);
                 setLikes(fetchedLikes);
@@ -41,7 +73,7 @@ export default function TripDetails() {
                 console.error("Failed to load likes:", err);
             }
         };
-        fetchLikes();
+        load();
     }, [tripId, email]);
 
     const likeHandler = async () => {
@@ -71,12 +103,10 @@ export default function TripDetails() {
         navigate('/trips');
     }, [tripId, deleteTrip, navigate, trip?.title]);
 
-    // This handler updates comments immediately
     const commentCreateHandler = useCallback((newComment) => {
-        setComments(prev => [newComment, ...prev]); // prepend new comment
+        setComments(prev => [newComment, ...prev]);
     }, []);
 
-    // Visit Item handlers
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setNewVisitItem(prev => ({ ...prev, [name]: value }));
@@ -122,10 +152,10 @@ export default function TripDetails() {
         }
     };
 
-    // Load comments on page load
+    // Load comments
     useEffect(() => {
         if (!tripId) return;
-        const fetchComments = async () => {
+        const run = async () => {
             try {
                 const data = await fetch(`http://localhost:8080/comments/trip/${tripId}`);
                 const json = await data.json();
@@ -134,10 +164,14 @@ export default function TripDetails() {
                 console.error("Failed to load comments:", err);
             }
         };
-        fetchComments();
+        run();
     }, [tripId]);
 
-    if (!trip) return <div>Trip not found!</div>;
+    // ------------- RENDER LOGIC -------------------
+
+    if (loading) return <div>Loading...</div>;
+    if (notFound) return <NotFound />;
+    if (!trip) return <TripNotFound />;
 
     return (
         <>
@@ -157,7 +191,6 @@ export default function TripDetails() {
 
                     <p className="text">{trip.summary}</p>
 
-                    {/* Likes Section */}
                     <div className="likes-section">
                         <p>{likes.length} likes</p>
                         {isMember && (
@@ -185,7 +218,6 @@ export default function TripDetails() {
                         </div>
                     )}
 
-                    {/* Members */}
                     {Array.isArray(trip.members) && trip.members.length > 0 && (
                         <div className="members-box">
                             <h3>Trip Members ({trip.members.length})</h3>
@@ -199,7 +231,6 @@ export default function TripDetails() {
                         </div>
                     )}
 
-                    {/* Create comment */}
                     {isMember && (
                         <CommentsCreate
                             tripId={tripId}
@@ -209,7 +240,6 @@ export default function TripDetails() {
                 </div>
             </section>
 
-            {/* Visit Items Section */}
             <VisitItemsFetcher
                 tripId={tripId}
                 email={email}
@@ -218,7 +248,6 @@ export default function TripDetails() {
                 reloadTrigger={visitItemsReloadKey}
             />
 
-            {/* Create/Edit Visit Item Section */}
             {isMember && (
                 <section id="create-visit-item">
                     <h2>{selectedVisitItem ? 'Edit visit item' : 'Create a visit point'}</h2>
