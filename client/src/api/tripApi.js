@@ -1,36 +1,47 @@
 import { useEffect, useState } from "react";
-import useAuth from "../hooks/useAuth"; 
+import useAuth from "../hooks/useAuth";
 
 const baseUrl = `http://localhost:8080/data/trips`;
 
+// ------------------- Fetch all trips -------------------
 export const useTrips = () => {
-    const { request } = useAuth(); 
+    const { request } = useAuth();
     const [trips, setTrips] = useState([]);
 
     useEffect(() => {
         request.get(baseUrl)
             .then(setTrips)
-            .catch(error => console.error("Error fetching trips:", error)); 
+            .catch(error => console.error("Error fetching trips:", error));
     }, [request]);
 
     return { trips };
 };
 
+// ------------------- Fetch single trip -------------------
 export const useTrip = (tripId) => {
-    const { request } = useAuth(); 
-    const [trip, setTrip] = useState({});
+    const { request } = useAuth();
+    const [trip, setTrip] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
 
     useEffect(() => {
+        if (!tripId) return;
+        setLoading(true);
         request.get(`${baseUrl}/${tripId}`)
-            .then(setTrip)
-            .catch(error => console.error("Error fetching trip:", error)); 
+            .then(data => setTrip(data))
+            .catch(err => {
+                if (err.status === 404) setNotFound(true);
+                else console.error("Error fetching trip:", err);
+            })
+            .finally(() => setLoading(false));
     }, [tripId, request]);
 
-    return { trip };
+    return { trip, loading, notFound };
 };
 
+// ------------------- Fetch latest trips -------------------
 export const useLatestTrips = () => {
-    const { request } = useAuth(); 
+    const { request } = useAuth();
     const [latestTrips, setLatestTrips] = useState([]);
     const [error, setError] = useState(null);
 
@@ -45,44 +56,83 @@ export const useLatestTrips = () => {
 
                 const response = await request.get(`${baseUrl}?${searchParams.toString()}`);
                 setLatestTrips(response);
-            } catch (error) {
+            } catch (err) {
                 setError("Failed to fetch latest trips.");
-                console.error("Error fetching latest trips:", error);
+                console.error("Error fetching latest trips:", err);
             }
         };
-
         fetchLatestTrips();
     }, [request]);
 
     return { latestTrips, error };
 };
 
+// ------------------- Create a trip -------------------
 export const useCreateTrip = () => {
     const { request } = useAuth();
 
-    const create = (tripData) =>
-        request.post(baseUrl, tripData)
-            .catch(error => console.error("Error creating trip:", error)); 
+    const create = async (tripData) => {
+        try {
+            // Send members as objects with id and email
+            const payload = {
+                ...tripData,
+                members: tripData.members?.map(member => ({
+                    id: member.id,
+                    email: member.email
+                })) || []
+            };
+
+            return await request.post(baseUrl, payload, {
+                headers: { "Content-Type": "application/json" }
+            });
+        } catch (error) {
+            console.error("Error creating trip:", error);
+            throw error;
+        }
+    };
 
     return { create };
 };
 
+// ------------------- Edit a trip -------------------
 export const useEditTrip = () => {
-    const { request } = useAuth(); 
+    const { request } = useAuth();
 
-    const edit = (tripId, tripData) =>
-        request.put(`${baseUrl}/${tripId}`, { ...tripData, _id: tripId })
-            .catch(error => console.error("Error editing trip:", error)); 
+    const edit = async (tripId, tripData) => {
+        try {
+            const payload = {
+                ...tripData,
+                _id: tripId,
+                members: tripData.members?.map(member => ({
+                    id: member.id,      // include id
+                    email: member.email // include email
+                })) || []
+            };
+
+            return await request.put(`${baseUrl}/${tripId}`, payload, {
+                headers: { "Content-Type": "application/json" }
+            });
+        } catch (error) {
+            console.error("Error editing trip:", error);
+            throw error;
+        }
+    };
 
     return { edit };
 };
 
+// ------------------- Delete a trip -------------------
 export const useDeleteTrip = () => {
-    const { request } = useAuth(); 
+    const { request } = useAuth();
 
-    const deleteTrip = (tripId) =>
-        request.delete(`${baseUrl}/${tripId}`)
-            .catch(error => console.error("Error deleting trip:", error)); 
+    const deleteTrip = async (tripId) => {
+        try {
+            return await request.delete(`${baseUrl}/${tripId}`);
+        } catch (error) {
+            console.error("Error deleting trip:", error);
+            throw error;
+        }
+    };
 
     return { deleteTrip };
 };
