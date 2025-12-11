@@ -28,30 +28,23 @@ export default function Register() {
 
         const { email, username, password, confirmPassword } = formData;
 
+        if (password !== confirmPassword) {
+            setErrorMessage("Password mismatch!");
+            return;
+        }
+
         try {
             const authData = await register(email, username, password);
-
-            if (authData.message === "A user with the same email already exists") {
-                setErrorMessage("Email already exists!");
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                setErrorMessage("Password mismatch!");
-                setFormData(prev => ({
-                    ...prev,
-                    password: "",
-                    confirmPassword: "",
-                }));
-                return;
-            }
-
             userLoginHandler(authData);
             navigate("/");
+        } catch (err) {
+            const backendError = err?.error;
 
-        } catch (error) {
-            console.error("Error during registration: ", error);
-            setErrorMessage("Registration failed! Please try again.");
+            if (backendError) {
+                setErrorMessage(backendError);
+            } else {
+                setErrorMessage("Registration failed! Please try again.");
+            }
         }
     };
 

@@ -12,7 +12,7 @@ export default function Logout() {
     useEffect(() => {
         logout()
             .finally(() => {
-                userLogoutHandler(); // clears React context immediately
+                userLogoutHandler(); 
                 setDone(true);
             });
     }, []);
