@@ -12,8 +12,12 @@ export const useSearchTrip = (memberEmail) => {
             try {
                 const trips = await request.get(baseUrl);
                 
-                const tripsWithMember = trips.filter(trip =>
-                    trip.members && trip.members.includes(memberEmail)
+                const tripsWithMember = trips.filter(
+                    trip =>
+                        Array.isArray(trip.members) &&
+                        trip.members.some(
+                            member => member.email === memberEmail.trim()
+                        )
                 );
                 
                 setFilteredTrips(tripsWithMember);
@@ -23,10 +27,12 @@ export const useSearchTrip = (memberEmail) => {
             }
         };
 
-        if (memberEmail) {
+        if (memberEmail.trim()) {
             fetchTripsByMember();
+        } else {
+            setFilteredTrips([]); 
         }
-    }, [memberEmail]); 
+    }, [memberEmail]);
 
     return { filteredTrips, error };
 };
