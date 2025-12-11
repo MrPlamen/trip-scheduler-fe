@@ -9,24 +9,24 @@ export const UserContext = createContext({
 
 export function UserProvider({ children }) {
     const [user, setUser] = useState(null);
-    const { me } = useAuth();
 
+    const { me } = useAuth();
+    const { logout: apiLogout } = useLogout();
+
+    // run on app load
     useEffect(() => {
         me()
-            .then(data => {
-                setUser(data);     // user is logged in
-            })
-            .catch(() => {
-                setUser(null);     // not logged in
-            });
+            .then(data => setUser(data))
+            .catch(() => setUser(null));
     }, []);
 
     const userLoginHandler = (userData) => {
         setUser(userData);
     };
 
-    const userLogoutHandler = () => {
-        setUser(null);
+    const userLogoutHandler = async () => {
+        await apiLogout();   // backend logout
+        setUser(null);       // frontend logout
     };
 
     return (
