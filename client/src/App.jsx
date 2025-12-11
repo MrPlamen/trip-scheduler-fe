@@ -1,23 +1,24 @@
-import { Routes, Route } from 'react-router'
-import { useState, useEffect } from 'react'
-import { UserContext } from './contexts/UserContext'
-import Header from './components/header/Header'
-import Home from './components/home/Home'
-import request from './utils/request'
-import TripCreate from './components/trip-create/TripCreate'
-import Register from './components/register/Register'
-import Login from './components/login/Login'
-import TripCatalog from './components/trip-catalog/TripCatalog'
-import TripDetails from './components/trip-details/TripDetails'
-import TripEdit from './components/trip-edit/TripEdit'
-import Logout from './components/logout/Logout'
-import VisitItemCatalog from './components/item-catalog/VisitItemCatalog'
-import VisitItemDetails from './components/item-details/VisitItemDetails'
-import Search from './components/search/Search'
-import PrivateRoute from './components/PrivateRoute'
+import { Routes, Route, Navigate } from 'react-router';
+import { useState, useEffect } from 'react';
+import { UserContext } from './contexts/UserContext';
+import Header from './components/header/Header';
+import Home from './components/home/Home';
+import request from './utils/request';
+import TripCreate from './components/trip-create/TripCreate';
+import Register from './components/register/Register';
+import Login from './components/login/Login';
+import TripCatalog from './components/trip-catalog/TripCatalog';
+import TripDetails from './components/trip-details/TripDetails';
+import TripEdit from './components/trip-edit/TripEdit';
+import Logout from './components/logout/Logout';
+import VisitItemCatalog from './components/item-catalog/VisitItemCatalog';
+import VisitItemDetails from './components/item-details/VisitItemDetails';
+import Search from './components/search/Search';
+import PrivateRoute from './components/PrivateRoute';
 import NotFound from './components/not-found/NotFound';
-import './App.css'
-import AdminPanel from './components/admin-panel/AdminPanel'
+import './App.css';
+import AdminPanel from './components/admin-panel/AdminPanel';
+import ProfilePage from './components/profile/Profile';
 
 function App() {
   const [authData, setAuthData] = useState(() => {
@@ -72,24 +73,24 @@ function App() {
                 <TripEdit />
               </PrivateRoute>
             } />
-            <Route path='/admin' element={
-              <PrivateRoute>
-                <AdminPanel />
-              </PrivateRoute>
-            } />
             <Route path='/trips' element={
               <PrivateRoute>
                 <TripCatalog />
               </PrivateRoute>
             } />
-            <Route path='/visits' element={
+            <Route path='/profile' element={
               <PrivateRoute>
-                <VisitItemCatalog />
+                <ProfilePage />
               </PrivateRoute>
             } />
             <Route path='/trips/:tripId/details' element={
               <PrivateRoute>
                 <TripDetails />
+              </PrivateRoute>
+            } />
+            <Route path='/visits' element={
+              <PrivateRoute>
+                <VisitItemCatalog />
               </PrivateRoute>
             } />
             <Route path='/visits/:visitItemId/details' element={
@@ -100,6 +101,13 @@ function App() {
             <Route path='/logout' element={
               <PrivateRoute>
                 <Logout />
+              </PrivateRoute>
+            } />
+
+            {/* Admin Route */}
+            <Route path='/admin' element={
+              <PrivateRoute requiredRole="ADMIN">
+                <AdminPanel />
               </PrivateRoute>
             } />
 

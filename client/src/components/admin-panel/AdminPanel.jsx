@@ -2,53 +2,55 @@ import { useState } from "react";
 import request from "../../utils/request";
 import "./AdminPanel.css";
 
-const BASE_URL = "http://localhost:8080";
-
 export default function AdminPanel() {
   const [email, setEmail] = useState("");
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState("");
 
+  // Search for a user by email
   const searchUser = async (e) => {
     e.preventDefault();
     setMessage("");
     setUser(null);
 
     try {
-      const response = await request.get(`${BASE_URL}/admin/search?email=${email}`, { credentials: "include" });
-      setUser(response);
+      const data = await request.get(`/admin/search?email=${encodeURIComponent(email)}`);
+      setUser(data);
     } catch (err) {
       setMessage(err?.error || "User not found");
     }
   };
 
+  // Block a user
   const blockUser = async (userId) => {
     try {
-      await request.post(`${BASE_URL}/admin/block/${userId}`, {}, { credentials: "include" });
+      await request.post(`/admin/block/${userId}`);
       setUser({ ...user, blocked: true });
       setMessage("User blocked successfully");
     } catch (err) {
-      setMessage("Failed to block user");
+      setMessage(err?.error || "Failed to block user");
     }
   };
 
+  // Unblock a user
   const unblockUser = async (userId) => {
     try {
-      await request.post(`${BASE_URL}/admin/unblock/${userId}`, {}, { credentials: "include" });
+      await request.post(`/admin/unblock/${userId}`);
       setUser({ ...user, blocked: false });
       setMessage("User unblocked successfully");
     } catch (err) {
-      setMessage("Failed to unblock user");
+      setMessage(err?.error || "Failed to unblock user");
     }
   };
 
+  // Update user role
   const updateRole = async (userId, role) => {
     try {
-      await request.post(`${BASE_URL}/admin/role/${userId}?role=${role}`, {}, { credentials: "include" });
+      await request.post(`/admin/role/${userId}?role=${role}`);
       setUser({ ...user, role });
       setMessage("Role updated successfully");
     } catch (err) {
-      setMessage("Failed to update role");
+      setMessage(err?.error || "Failed to update role");
     }
   };
 
@@ -74,7 +76,7 @@ export default function AdminPanel() {
           <p><b>Username:</b> {user.username}</p>
           <p><b>Email:</b> {user.email}</p>
           <p>
-            <b>Role:</b>
+            <b>Role:</b>{" "}
             <select value={user.role} onChange={(e) => updateRole(user.id, e.target.value)}>
               <option value="USER">USER</option>
               <option value="ADMIN">ADMIN</option>
