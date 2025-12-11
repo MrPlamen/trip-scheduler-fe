@@ -54,7 +54,7 @@ export const useLatestTrips = () => {
                     select: '_id,imageUrl,title,members',
                 });
 
-                const response = await request.get(`${baseUrl}?${searchParams.toString()}`);
+                const response = await request.get("http://localhost:8080/data/trips/public");
                 setLatestTrips(response);
             } catch (err) {
                 setError("Failed to fetch latest trips.");

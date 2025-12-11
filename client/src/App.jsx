@@ -17,6 +17,7 @@ import Search from './components/search/Search'
 import PrivateRoute from './components/PrivateRoute'
 import NotFound from './components/not-found/NotFound';
 import './App.css'
+import AdminPanel from './components/admin-panel/AdminPanel'
 
 function App() {
   const [authData, setAuthData] = useState(() => {
@@ -69,6 +70,11 @@ function App() {
             <Route path='/trips/:tripId/edit' element={
               <PrivateRoute>
                 <TripEdit />
+              </PrivateRoute>
+            } />
+            <Route path='/admin' element={
+              <PrivateRoute>
+                <AdminPanel />
               </PrivateRoute>
             } />
             <Route path='/trips' element={

@@ -22,6 +22,7 @@ export default function Header() {
 
                 {username || email ? (
                     <>
+                        <Link className="nav-link" to="/admin">Admin Panel</Link>
                         <Link className="nav-link" to="/trips">My trips</Link>
                         <Link className="nav-link" to="/visits">My visit points</Link>
                         <Link className="nav-link" to="/trips/create">Create Trip</Link>

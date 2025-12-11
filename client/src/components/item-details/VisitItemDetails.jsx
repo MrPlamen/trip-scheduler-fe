@@ -9,7 +9,7 @@ import {
 import useAuth from "../../hooks/useAuth";
 import CommentsShow from "../comment-show/CommentsShow";
 import CommentsCreate from "../comments-create/CommentsCreate";
-import VisitItemNotFound from "../not-found/VisitItemNotFound"; // Make sure this component exists
+import VisitItemNotFound from "../not-found/VisitItemNotFound"; 
 
 export default function VisitItemDetails() {
   const { visitItemId } = useParams();
@@ -55,7 +55,7 @@ export default function VisitItemDetails() {
     }
   }, [visitItem]);
 
-  if (notFound) return <VisitItemNotFound />; // Render 404 component if not found
+  if (notFound) return <VisitItemNotFound />; 
 
   if (!visitItem) return <div>Loading visit item...</div>;
 
