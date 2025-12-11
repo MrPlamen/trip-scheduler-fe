@@ -36,7 +36,7 @@ export default function Login() {
                     <i className="fas fa-user"></i>
                     <h1>Login</h1>
                     <label className="auth-label" htmlFor="email">Email:</label>
-                    <input id="email" name="email" placeholder="example@mail.com" />
+                    <input type="email" id="email" name="email" placeholder="example@mail.com" />
 
                     <label className="auth-label" htmlFor="login-pass">Password:</label>
                     <input type="password" id="login-password" name="password" />
