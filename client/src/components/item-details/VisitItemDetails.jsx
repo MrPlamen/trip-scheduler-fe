@@ -9,7 +9,7 @@ import {
 import useAuth from "../../hooks/useAuth";
 import CommentsShow from "../comment-show/CommentsShow";
 import CommentsCreate from "../comments-create/CommentsCreate";
-import VisitItemNotFound from "../not-found/VisitItemNotFound"; 
+import VisitItemNotFound from "../not-found/VisitItemNotFound";
 
 export default function VisitItemDetails() {
   const { visitItemId } = useParams();
@@ -55,13 +55,14 @@ export default function VisitItemDetails() {
     }
   }, [visitItem]);
 
-  if (notFound) return <VisitItemNotFound />; 
+  if (notFound) return <VisitItemNotFound />;
 
   if (!visitItem) return <div>Loading visit item...</div>;
 
-  const createdDate = new Date(visitItem._createdOn).toLocaleDateString();
+  const createdDate = new Date(visitItem.date).toLocaleDateString();
   const isOwner = visitItem.ownerId === userId;
-  const isMember = visitItem.members?.some(m => m.email === email);
+  const isMember = true;
+  // const isMember = visitItem.members?.some(m => m.email === email);
 
   // ------------------- Handlers -------------------
   const handleInputChange = (e) => {
@@ -105,13 +106,14 @@ export default function VisitItemDetails() {
   return (
     <section id="trip-details">
       <h2>Visit Point Details</h2>
+      <br />
 
-      <div className="info-section">
+      <div className={`info-section ${editItem ? "edit-mode" : ""}`}>
         <div className="trip-header">
           <img className="trip-img" src={visitItem.imageUrl} alt={visitItem.title} />
 
           {editItem ? (
-            <input name="title" value={newVisitItem.title} onChange={handleInputChange} />
+            <></>
           ) : (
             <h1>{visitItem.title}</h1>
           )}
@@ -125,13 +127,35 @@ export default function VisitItemDetails() {
           )}
 
           {editItem ? (
-            <textarea
-              name="description"
-              value={newVisitItem.description}
-              onChange={handleInputChange}
-            />
+            <>
+              <input
+                name="title"
+                value={newVisitItem.title}
+                onChange={handleInputChange}
+              />
+              <input
+                name="imageUrl"
+                value={newVisitItem.imageUrl}
+                onChange={handleInputChange}
+              />
+              <input
+                name="category"
+                value={newVisitItem.category}
+                onChange={handleInputChange}
+              />
+              <textarea
+                name="description"
+                value={newVisitItem.description}
+                onChange={handleInputChange}
+              />
+            </>
           ) : (
-            <p className="text">{visitItem.description}</p>
+            <>
+              <br />
+              <div className="description-detailed">
+                <p className="text">{visitItem.description}</p>
+              </div>
+            </>
           )}
         </div>
 
@@ -169,6 +193,7 @@ export default function VisitItemDetails() {
       {/* Save button */}
       {isOwner && editItem && (
         <div className="buttons">
+          <br />
           <button onClick={visitItemSubmitHandler} className="button">
             Save Changes
           </button>

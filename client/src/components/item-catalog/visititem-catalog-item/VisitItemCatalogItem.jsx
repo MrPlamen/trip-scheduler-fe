@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 
 export default function VisitItemCatalogItem({
-    _id,
+    id,
     title,
     category,
     imageUrl,
@@ -14,7 +14,7 @@ export default function VisitItemCatalogItem({
                 <h2>{title}</h2>
                 <h6>{category}</h6>
                 <p>{description}</p>
-                <Link to={`/visits/${_id}/details`} className="details-button">Details</Link>
+                <Link to={`/visits/${id}/details`} className="details-button">Details</Link>
             </div>
         </div>
     );

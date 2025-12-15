@@ -18,7 +18,100 @@ main {
   align-items: center;
 }
 
+#hero-header {
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .hero-home > img {
   width: 240px;
   margin-left: 16vw;
 }
+
+#comment-hero {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  margin-top: 20px;
+}
+
+#comment-content {
+  margin-top: 20px;
+  font-size: 1rem;
+  color: #555;
+}
+
+.visit-item-container {
+  max-width: 180px;
+}
+
+.visit-item-description {
+  font-size: 0.9rem;
+  color: #555;
+  max-width: 180px;
+  text-align: center;
+  overflow-wrap: break-word;  
+  word-break: break-word;      
+  white-space: normal;         
+}
+
+.edit-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.edit-mode > * {
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+}
+
+.edit-mode .trip-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.edit-mode .trip-img {
+  float: none;
+  margin: 0 0 20px 0;
+}
+
+.edit-mode input,
+.edit-mode textarea {
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.edit-mode textarea {
+  min-height: 120px;
+}
+
+.edit-mode .buttons {
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+}
+
+#comment-hero {
+  padding-top: 12px;
+  color: #9d9d9d;
+  font-weight: 100;
+  font-size: 22px;
+  display: block;
+  text-align: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* .edit-mode {
+  width: 50vw;
+  margin: 0 auto;
+} */
+
+

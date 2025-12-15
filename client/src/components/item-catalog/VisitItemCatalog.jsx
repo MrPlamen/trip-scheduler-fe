@@ -5,19 +5,17 @@ import VisitItemCatalogItem from "./visititem-catalog-item/VisitItemCatalogItem"
 
 export default function VisitItemCatalog() {
     const { visitItems } = useVisitItems(); 
-    const { email } = useContext(UserContext);  
+    const { id } = useContext(UserContext);  
 
     const visitItemsArray = Array.isArray(visitItems) ? visitItems : [];
 
     const userItems = visitItemsArray.filter(
-        visitItem =>
-            Array.isArray(visitItem.members) &&
-            visitItem.members.some(member => member.email === email)
+        (visitItem) => visitItem.ownerId === id
     );
 
     return (
         <section id="catalog-page">
-            <h1>Visit points you are a part of</h1>
+            <h1>Visit points you have created</h1>
 
             {userItems.length > 0
                 ? userItems.map(visitItem => (

@@ -29,9 +29,11 @@
 }
 
 .trip-header {
+    margin-top: 20px;
     position: relative;
     padding: 25px;
     height: 40%;
+    min-height: 300px;
 }
 
 .trip_header>h1 {
@@ -150,7 +152,7 @@
 #home-page h1 {
     margin-top: 4px;
     margin-bottom: 28px;
-    color:beige;
+    color: beige;
 }
 
 #home-page {
@@ -162,19 +164,19 @@
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    gap: 20px; 
+    gap: 20px;
     padding: 10px 0;
 }
 
 .trip {
-    flex: 0 0 auto; 
-    width: 400px; 
-    border: 1px solid #8ca2df; 
+    flex: 0 0 auto;
+    width: 400px;
+    border: 1px solid #8ca2df;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     background-color: #fff;
-    scroll-snap-align: start; 
+    scroll-snap-align: start;
 }
 
 .trip-text {
@@ -184,7 +186,7 @@
 
 .image-latest img {
     width: 100%;
-    height: 200px; 
+    height: 200px;
     object-fit: cover;
 }
 
@@ -198,7 +200,6 @@
     color: #888;
 }
 
-/* scrollbar styling */
 .trip-slider::-webkit-scrollbar {
     height: 8px;
 }
@@ -230,51 +231,70 @@
 }
 
 .visit-item-card {
+    max-width: 220px;
+    height: 420px;
     background-color: #fff;
     border-radius: 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     padding: 1.5rem;
-    margin: 1.5rem 0;
-    margin-top: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: transform 0.2s ease-in-out;
-  }
-  
-  .visit-item-card:hover {
+}
+
+.visit-item-container {
+    width: 100%;
+    text-align: center;
+}
+
+.visit-item-description {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.likes-wrapper {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.likes-hero-1 {
+    margin-bottom: 5px;
+}
+
+.visit-item-card:hover {
     transform: translateY(-4px);
-  }
-  
-  .visit-item-card img {
+}
+
+.visit-item-card img {
     width: 160px;
     height: auto;
     border-radius: 0.75rem;
     margin-bottom: 1rem;
     object-fit: cover;
-  }
-  
-  .visit-item-card h3 {
+}
+
+.visit-item-card h3 {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
     color: #333;
-  }
-  
-  .visit-item-card p {
+}
+
+.visit-item-card p {
     font-size: 1rem;
     color: #666;
     margin-bottom: 1rem;
-  }
-  
-  .visit-item-card .visit-item-actions {
+}
+
+.visit-item-card .visit-item-actions {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
-  }
-  
-  .visit-item-card .button {
+}
+
+.visit-item-card .button {
     padding: 0.5rem 1rem;
-    /* border-radius: 0.3rem; */
     margin-bottom: 4px;
     min-height: 42px;
     border: none;
@@ -282,64 +302,84 @@
     cursor: pointer;
     font-weight: 500;
     transition: background-color 0.2s ease;
-  }
+}
 
-  .likes-section .buttons{
+.likes-section .buttons {
     padding-right: 0px !important;
     padding-bottom: 0px !important;
-  }
-  
-  #visit-items {
+}
+
+#visit-items {
+  padding-top: 34px;
     display: flex;
     flex-direction: row;
     gap: 30px;
-  }
-  
-  #visit-items h2 {
+    align-items: stretch;
+}
+
+#visit-items h2 {
     display: block;
     margin-bottom: 12px;
-  }
+}
 
-  .create-comment {
+.visit-item-card-link {
+    font-weight: bold;
+    color: #4f54bb;
+}
+
+.trip-header {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.trip-img {
+  float: left;
+  width: 420px;
+  margin-right: 24px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.create-comment {
     background-color: #f9f9f9;
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     margin-top: 2rem;
-  }
-  
-  .comment-heading {
+}
+
+.comment-heading {
     font-size: 1.25rem;
     margin-bottom: 1rem;
     color: #333;
-  }
-  
-  .comment-form .form-group {
+}
+
+.comment-form .form-group {
     margin-bottom: 1rem;
-  }
-  
-  .form-label {
+}
+
+.form-label {
     display: block;
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: #555;
-  }
-  
-  .form-textarea {
+}
+
+.form-textarea {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 1rem;
     resize: vertical;
-  }
-  
-  .form-actions {
+}
+
+.form-actions {
     text-align: right;
-  }
-  
-  .submit-btn {
-    background-color: #4f54bb; 
+}
+
+.submit-btn {
+    background-color: #4f54bb;
     color: white;
     padding: 0.6rem 1.2rem;
     font-weight: bold;
@@ -347,23 +387,23 @@
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.2s ease;
-  }
-  
-  .submit-btn:hover {
+}
+
+.submit-btn:hover {
     background-color: #454aa5;
-  }
-  
-  .info-section .text {
+}
+
+.info-section .text {
     display: inline-block;
     margin-top: 0px !important;
     padding: 30px !important;
-  }
+}
 
-  .levels {
+.levels {
     margin-top: 30px;
-  }
-  
-  .members-box {
+}
+
+.members-box {
     background-color: #f7f7f7;
     display: block;
     border-top: 1px solid gray;
@@ -388,3 +428,58 @@
     margin-bottom: 0.3rem;
     color: #555;
 }
+
+.visit-item-description {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.likes-section {
+    margin-top: auto;
+    width: 100%;
+}
+
+.likes-hero-1 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.trip-header {
+  position: relative;
+  padding: 25px;
+  overflow: hidden;
+}
+
+.trip-img {
+  float: left;
+  width: 420px;
+  margin-right: 24px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.description-detailed {
+  display: block;
+  margin-top: 16px;
+  background-color: #f4f4f4;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.description-detailed .text {
+  margin: 0;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.allTrips-info p {
+  color: #3351a2;
+}
+
+.info-section > p {
+  max-width: 78vw;
+  text-align: start;
+}
+

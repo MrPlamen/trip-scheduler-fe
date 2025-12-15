@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { UserContext } from "../../contexts/UserContext";
 
 export default function Header() {
-    const { email, username } = useContext(UserContext);
+    const { email, username, id } = useContext(UserContext);
 
     return (
         <header className="header-container">

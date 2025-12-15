@@ -73,13 +73,17 @@ export const useCreateTrip = () => {
 
     const create = async (tripData) => {
         try {
-            // Send members as objects with id and email
+            const uniqueEmails = [
+                ...new Set(
+                    (tripData.members || [])
+                        .map(email => email.trim())
+                        .filter(Boolean)
+                )
+            ];
+
             const payload = {
                 ...tripData,
-                members: tripData.members?.map(member => ({
-                    id: member.id,
-                    email: member.email
-                })) || []
+                members: uniqueEmails.map(email => ({ email }))
             };
 
             return await request.post(baseUrl, payload, {
@@ -100,13 +104,22 @@ export const useEditTrip = () => {
 
     const edit = async (tripId, tripData) => {
         try {
+            const emails = [
+                ...new Set(
+                    (tripData.members || [])
+                        .map(member =>
+                            typeof member === "string"
+                                ? member.trim()
+                                : member?.email?.trim()
+                        )
+                        .filter(Boolean)
+                )
+            ];
+
             const payload = {
                 ...tripData,
                 _id: tripId,
-                members: tripData.members?.map(member => ({
-                    id: member.id,      // include id
-                    email: member.email // include email
-                })) || []
+                members: emails.map(email => ({ email }))
             };
 
             return await request.put(`${baseUrl}/${tripId}`, payload, {
@@ -120,6 +133,7 @@ export const useEditTrip = () => {
 
     return { edit };
 };
+
 
 // ------------------- Delete a trip -------------------
 export const useDeleteTrip = () => {
